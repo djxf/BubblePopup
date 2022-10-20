@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.djxf.myapplication.BubbleRelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/brlBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:cornerRadiusBu="10"
+        app:halfBaseOfLeg="18dp"
+        app:padding="10dp"
+        app:shadowColor="@color/black"
+        app:strokeWidthBu="5">
+
+        <!-- add view  -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:text="你发大厦附近覅电fds fdsfsd脑赛风粉底萨芬发的司法覅绝对是放地上飞机上的"
+            android:layout_width="wrap_content"
+            android:textColor="@color/white"
+            android:maxWidth="200dp"
+            android:padding="0dp"
+            android:layout_height="wrap_content"/>
+
+    </com.djxf.myapplication.BubbleRelativeLayout>
+
+
+</LinearLayout>
