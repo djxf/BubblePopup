@@ -40,7 +40,6 @@ public class BubbleRelativeLayout extends RelativeLayout {
     public static int SHADOW_COLOR = Color.BLACK;
     public static float MIN_LEG_DISTANCE = PADDING + LEG_HALF_BASE;
 
-    private Paint mFillPaint = null;
     private final Path mPath = new Path();
     private final Path mBubbleLegPrototype = new Path();
     private final Paint mPaint = new Paint(Paint.DITHER_FLAG);
@@ -62,8 +61,6 @@ public class BubbleRelativeLayout extends RelativeLayout {
     }
 
     private void init(final Context context, final AttributeSet attrs) {
-
-        //setGravity(Gravity.CENTER);
 
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         setLayoutParams(params);
@@ -95,7 +92,7 @@ public class BubbleRelativeLayout extends RelativeLayout {
 
         setLayerType(LAYER_TYPE_SOFTWARE, mPaint);
 
-        mFillPaint = new Paint(mPaint);
+        Paint mFillPaint = new Paint(mPaint);
         mFillPaint.setColor(Color.BLACK);
         mFillPaint.setShader(new LinearGradient(100f, 0f, 100f, 200f, Color.WHITE, Color.WHITE, TileMode.CLAMP));
 
@@ -105,7 +102,6 @@ public class BubbleRelativeLayout extends RelativeLayout {
         renderBubbleLegPrototype();
 
         setPadding(PADDING, PADDING, PADDING, PADDING);
-
     }
 
     @Override
@@ -164,7 +160,8 @@ public class BubbleRelativeLayout extends RelativeLayout {
 
         }
 
-        matrix.postTranslate(dstX, dstY);
+        matrix.postTranslate(dstX, 0);
+//        matrix.postTranslate(0, dstY);
         return matrix;
     }
 
