@@ -18,6 +18,7 @@ public class BubblePopupWindow extends PopupWindow {
 
     private BubbleRelativeLayout bubbleView;
     private Context context;
+    private int finalWidth;
 
     public BubblePopupWindow(Context context) {
         this.context = context;
@@ -86,15 +87,18 @@ public class BubblePopupWindow extends PopupWindow {
             DisplayMetrics dm = resources.getDisplayMetrics();
             int screenWidth = dm.widthPixels;
             if (getMeasuredWidth() >= (screenWidth - (location[0]*2 + parent.getWidth()) / 2)) {
-                int width = screenWidth - (location[0]*2 + parent.getWidth()) / 2;
-                setWidth((int) (width));
+                finalWidth = screenWidth - (location[0]*2 + parent.getWidth()) / 2;
+                setWidth((int) finalWidth);
+            } else if (getMeasuredWidth()/2 >= (location[0] + parent.getWidth()/2)) {
+                finalWidth = (location[0] + parent.getWidth()/2)*2;
+                setWidth((int) (finalWidth));
             }
 
-            bubbleView.setBubbleParams(orientation, bubbleOffset); // 设置气泡布局方向及尖角偏移
+            bubbleView.setBubbleParams(orientation, getMeasuredWidth()/2); // 设置气泡布局方向及尖角偏移
 
             switch (gravity) {
                 case Gravity.BOTTOM:
-                    showAtLocation(parent, Gravity.NO_GRAVITY, (int) (location[0] + parent.getWidth()/2 - (bubbleView.getPaddingLeft() * 2.5)), location[1] + parent.getHeight());
+                    showAtLocation(parent, Gravity.NO_GRAVITY, (int) (location[0] + parent.getWidth()/2 - getMeasuredWidth()/2), location[1] + parent.getHeight());
                     break;
                 case Gravity.TOP:
                     showAtLocation(parent, Gravity.NO_GRAVITY, location[0], location[1] - getMeasureHeight());
@@ -130,6 +134,30 @@ public class BubblePopupWindow extends PopupWindow {
     public int getMeasuredWidth() {
         getContentView().measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int popWidth = getContentView().getMeasuredWidth();
-        return popWidth;
+        return finalWidth == 0 ? popWidth : finalWidth;
+    }
+
+    public static class Builder {
+        private Context mContext;
+        private View mShowView;
+        private View mAnchors;
+        private int mGravity;
+        private float mBubbleOffset;
+
+        public Builder() {
+        }
+
+        public Builder(Context mContext, View mShowView, View mAnchors) {
+            this.mContext = mContext;
+            this.mShowView = mShowView;
+            this.mAnchors = mAnchors;
+        }
+
+        public Builder setGravity(int gravity) {
+            this.mGravity = gravity;
+            return this;
+        }
+
+
     }
 }
