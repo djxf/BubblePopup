@@ -64,6 +64,45 @@ class BubbleRelativeLayout(mContext: Context, attributeSet: AttributeSet?, style
         mBubbleLegPrototype.close()
     }
 
+    private fun renderBubbleLegMatrix(width: Int, height: Int): Matrix {
+        val offset =
+            Math.max(mBubbleLegOffset, MIN_LEG_DISTANCE)
+        var dstX = 0f
+        var dstY =
+            Math.min(offset, height - MIN_LEG_DISTANCE)
+        val matrix = Matrix()
+        when (mBubbleOrientation) {
+            BubbleLegOrientation.TOP -> {
+                dstX = Math.min(
+                    offset,
+                    width - MIN_LEG_DISTANCE
+                )
+                dstY = 0f
+                matrix.postRotate(90f)
+            }
+            BubbleLegOrientation.RIGHT -> {
+                dstX = width.toFloat()
+                dstY = Math.min(
+                    offset,
+                    height - MIN_LEG_DISTANCE
+                )
+                matrix.postRotate(180f)
+            }
+            BubbleLegOrientation.BOTTOM -> {
+                dstX = Math.min(
+                    offset,
+                    width - MIN_LEG_DISTANCE
+                )
+                dstY = height.toFloat()
+                matrix.postRotate(270f)
+            }
+            else -> {}
+        }
+        matrix.postTranslate(dstX, 0f)
+        matrix.postTranslate(0f, dstY);
+        return matrix
+    }
+
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -77,7 +116,9 @@ class BubbleRelativeLayout(mContext: Context, attributeSet: AttributeSet?, style
         super.onDraw(canvas)
         mPath.rewind()
         mPath.addRoundRect(mRoundRect, CORNER_RADIUS, CORNER_RADIUS, Path.Direction.CW)
-        mPath.addPath(mBubbleLegPrototype)
+        if (canvas != null) {
+            mPath.addPath(mBubbleLegPrototype, renderBubbleLegMatrix(width, height))
+        }
         canvas?.drawPath(mPath, mPaint)
     }
 
