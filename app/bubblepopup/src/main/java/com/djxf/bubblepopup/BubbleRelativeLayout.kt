@@ -4,34 +4,33 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.Paint.Cap
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.widget.RelativeLayout
 
-class BubbleRelativeLayout(mContext: Context, attributeSet: AttributeSet?, style: Int) : RelativeLayout(mContext, attributeSet, style) {
+class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, style: Int) : RelativeLayout(mContext, attributeSet, style) {
 
 
     constructor(mContext: Context): this(mContext, null)
     constructor(mContext: Context, attributeSet: AttributeSet?) : this(mContext, attributeSet, 0)
 
-    init {
-        initView(attributeSet)
-    }
 
     var PADDING = 30
     var LEG_HALF_BASE = 30
     var STROKE_WIDTH = 2.0f
     var CORNER_RADIUS = 8.0f
-    var SHADOW_COLOR = Color.BLACK
+    var SHADOW_COLOR = Color.BLUE
     var MIN_LEG_DISTANCE = (PADDING + LEG_HALF_BASE).toFloat()
 
     private val mPath = Path()
     private val mBubbleLegPrototype = Path()
-    private val mRoundRect = RectF(PADDING.toFloat(), PADDING.toFloat(),
-        (width - PADDING).toFloat(),
-        (height-PADDING).toFloat()
-    )
+
     private val mPaint = Paint(Paint.DITHER_FLAG)
     private val mBubbleLegOffset = 0.75f
-    private val mBubbleOrientation: BubbleRelativeLayout.BubbleLegOrientation = BubbleLegOrientation.LEFT
+    private val mBubbleOrientation: BubbleLegOrientation = BubbleLegOrientation.TOP
+
+    init {
+        initView(attributeSet)
+    }
 
     private fun initView(attributeSet: AttributeSet?) {
         val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.bubble)
@@ -54,10 +53,12 @@ class BubbleRelativeLayout(mContext: Context, attributeSet: AttributeSet?, style
         mPaint.strokeJoin = Paint.Join.MITER
         mPaint.pathEffect = CornerPathEffect(CORNER_RADIUS)
         mPaint.setShadowLayer(2f, 2f, 5f, SHADOW_COLOR)
+        setPadding(PADDING, PADDING, PADDING, PADDING)
         generateRenderBubbleLegPrototype()
+        layoutParams = ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     }
 
-    fun generateRenderBubbleLegPrototype() {
+    private fun generateRenderBubbleLegPrototype() {
         mBubbleLegPrototype.moveTo(0f, 0f)
         mBubbleLegPrototype.lineTo((PADDING * 1.5).toFloat(), (-PADDING/1.5).toFloat())
         mBubbleLegPrototype.lineTo((PADDING * 1.5).toFloat(), (PADDING/1.5).toFloat())
@@ -98,24 +99,17 @@ class BubbleRelativeLayout(mContext: Context, attributeSet: AttributeSet?, style
             }
             else -> {}
         }
-        matrix.postTranslate(dstX, 0f)
-        matrix.postTranslate(0f, dstY);
+        matrix.postTranslate(dstX, dstY)
         return matrix
     }
 
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-    }
-
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        super.onLayout(changed, l, t, r, b)
-    }
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         mPath.rewind()
-        mPath.addRoundRect(mRoundRect, CORNER_RADIUS, CORNER_RADIUS, Path.Direction.CW)
+        mPath.addRoundRect(RectF(PADDING.toFloat(), PADDING.toFloat(),
+            (width - PADDING).toFloat(),
+            (height - PADDING).toFloat()), CORNER_RADIUS, CORNER_RADIUS, Path.Direction.CW)
         if (canvas != null) {
             mPath.addPath(mBubbleLegPrototype, renderBubbleLegMatrix(width, height))
         }

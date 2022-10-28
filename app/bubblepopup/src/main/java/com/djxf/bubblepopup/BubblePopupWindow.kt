@@ -1,11 +1,15 @@
 package com.djxf.bubblepopup
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.LayoutParams
 import android.widget.PopupWindow
 
-class BubblePopupWindow(builder: Builder) : PopupWindow(builder.context) {
+class BubblePopupWindowCustom constructor(builder: Builder) : PopupWindow(builder.context) {
 
     var mContext: Context = builder.context
     var mShowView: View = builder.mShowView
@@ -13,11 +17,23 @@ class BubblePopupWindow(builder: Builder) : PopupWindow(builder.context) {
     private var mGravity: Int = builder.mGravity
     var mBubbleOffset: Float = builder.mBubbleOffset
 
+    init {
+        isTouchable = true
+        isFocusable = true
+        width = LayoutParams.WRAP_CONTENT
+        height = LayoutParams.WRAP_CONTENT
+        setBackgroundDrawable(ColorDrawable(0))
+    }
+
 
     /**
      * 显示弹窗
      */
     fun show() {
+        val bubbleRelativeLayout = BubbleRelativeLayout(mContext)
+        bubbleRelativeLayout.addView(mShowView)
+        bubbleRelativeLayout.setBackgroundColor(Color.TRANSPARENT)
+        contentView = bubbleRelativeLayout
         if (!isShowing) {
             val location = IntArray(2) {
                 return@IntArray 0
@@ -55,16 +71,17 @@ class BubblePopupWindow(builder: Builder) : PopupWindow(builder.context) {
         }
     }
 
+
     private fun getMeasuredWidth(): Int {
-        TODO("Not yet implemented")
+        return mShowView.measuredWidth
     }
 
     private fun getMeasureHeight(): Int {
-        TODO("Not yet implemented")
+        return mShowView.measuredWidth
     }
 
 
-    inner class Builder(val context: Context, val mShowView: View, val mAnchor: View) {
+     class Builder(val context: Context, var mShowView: View, val mAnchor: View) {
 
         var mGravity: Int = Gravity.BOTTOM
         var mBubbleOffset: Float = 0F
@@ -77,6 +94,6 @@ class BubblePopupWindow(builder: Builder) : PopupWindow(builder.context) {
             this.mBubbleOffset = offset
         }
 
-        fun build(): BubblePopupWindow = BubblePopupWindow(builder = this)
+        fun build(): BubblePopupWindowCustom = BubblePopupWindowCustom(builder = this)
     }
 }
