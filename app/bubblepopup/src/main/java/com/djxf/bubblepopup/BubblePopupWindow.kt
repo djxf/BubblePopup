@@ -15,7 +15,8 @@ class BubblePopupWindowCustom constructor(builder: Builder) : PopupWindow(builde
     var mShowView: View = builder.mShowView
     private val mAnchor: View = builder.mAnchor
     private var mGravity: Int = builder.mGravity
-    var mBubbleOffset: Float = builder.mBubbleOffset
+    private var mBubbleOffset: Float = builder.mBubbleOffset
+    private var mFillColor: Int = builder.mFillColor
 
     init {
         isTouchable = true
@@ -33,6 +34,9 @@ class BubblePopupWindowCustom constructor(builder: Builder) : PopupWindow(builde
         val bubbleRelativeLayout = BubbleRelativeLayout(mContext)
         bubbleRelativeLayout.addView(mShowView)
         bubbleRelativeLayout.setBackgroundColor(Color.TRANSPARENT)
+        bubbleRelativeLayout.setBubbleLegOffset(mBubbleOffset)
+        bubbleRelativeLayout.setPaintColor(mFillColor)
+        bubbleRelativeLayout.setBubbleOrientation(mGravity)
         contentView = bubbleRelativeLayout
         if (!isShowing) {
             val location = IntArray(2) {
@@ -43,26 +47,26 @@ class BubblePopupWindowCustom constructor(builder: Builder) : PopupWindow(builde
                 Gravity.BOTTOM -> showAtLocation(
                     mAnchor,
                     Gravity.NO_GRAVITY,
-                    (location[0] + mAnchor.width / 2 - mShowView.paddingLeft * 2.5).toInt(),
+                    (location[0]),
                     location[1] + mAnchor.height
                 )
                 Gravity.TOP -> showAtLocation(
                     mAnchor,
                     Gravity.NO_GRAVITY,
-                    location[0],
-                    location[1] - getMeasureHeight()
+                    (location[0] + mAnchor.width / 2 - bubbleRelativeLayout.getOffsetWidthDistance()).toInt(),
+                    location[1] + mAnchor.height
                 )
                 Gravity.RIGHT -> showAtLocation(
                     mAnchor,
                     Gravity.NO_GRAVITY,
                     location[0] + mAnchor.width,
-                    location[1] - mAnchor.height / 2
+                    (location[1] + mAnchor.height/2 - bubbleRelativeLayout.getOffsetHeightDistance()).toInt()
                 )
                 Gravity.LEFT -> showAtLocation(
                     mAnchor,
                     Gravity.NO_GRAVITY,
-                    location[0] - getMeasuredWidth(),
-                    location[1] - mAnchor.height / 2
+                    location[0] - bubbleRelativeLayout.getMeasureWidth(),
+                    (location[1] + mAnchor.height/2 - bubbleRelativeLayout.getOffsetHeightDistance()).toInt()
                 )
                 else -> {}
             }
@@ -81,17 +85,26 @@ class BubblePopupWindowCustom constructor(builder: Builder) : PopupWindow(builde
     }
 
 
-     class Builder(val context: Context, var mShowView: View, val mAnchor: View) {
+    class Builder(val context: Context, var mShowView: View, val mAnchor: View) {
 
-        var mGravity: Int = Gravity.BOTTOM
-        var mBubbleOffset: Float = 0F
+        //尖角方向朝向
+        var mGravity: Int = Gravity.TOP
+        var mBubbleOffset: Float = 0.5f
+        var mFillColor: Int = Color.BLACK
 
         fun gravity(gravity: Int) = apply {
             this.mGravity = gravity
         }
 
         fun bubbleOffset(offset: Float) = apply {
+            if (offset < 0 || offset > 1) {
+                throw IllegalStateException("offset cannot < 0 or > 1")
+            }
             this.mBubbleOffset = offset
+        }
+
+        fun fillColor(fillColor: Int) = apply {
+            this.mFillColor = fillColor
         }
 
         fun build(): BubblePopupWindowCustom = BubblePopupWindowCustom(builder = this)

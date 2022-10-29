@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.Paint.Cap
 import android.util.AttributeSet
+import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 
@@ -15,18 +17,16 @@ class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, styl
 
 
     var PADDING = 30
-    var LEG_HALF_BASE = 30
     var STROKE_WIDTH = 2.0f
     var CORNER_RADIUS = 8.0f
     var SHADOW_COLOR = Color.BLUE
-    var MIN_LEG_DISTANCE = (PADDING + LEG_HALF_BASE).toFloat()
 
     private val mPath = Path()
     private val mBubbleLegPrototype = Path()
 
     private val mPaint = Paint(Paint.DITHER_FLAG)
-    private val mBubbleLegOffset = 0.75f
-    private val mBubbleOrientation: BubbleLegOrientation = BubbleLegOrientation.TOP
+    private var mBubbleLegOffset = 0.25f
+    private var mBubbleOrientation = Gravity.TOP
 
     init {
         initView(attributeSet)
@@ -39,7 +39,6 @@ class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, styl
             SHADOW_COLOR = typedArray.getInt(R.styleable.bubble_shadowColor, SHADOW_COLOR)
             STROKE_WIDTH = typedArray.getFloat(R.styleable.bubble_strokeWidthBu, STROKE_WIDTH)
             CORNER_RADIUS = typedArray.getFloat(R.styleable.bubble_cornerRadiusBu, CORNER_RADIUS)
-            MIN_LEG_DISTANCE = typedArray.getFloat(R.styleable.bubble_halfBaseOfLeg, MIN_LEG_DISTANCE)
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         } finally {
@@ -52,7 +51,6 @@ class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, styl
         mPaint.strokeWidth = STROKE_WIDTH
         mPaint.strokeJoin = Paint.Join.MITER
         mPaint.pathEffect = CornerPathEffect(CORNER_RADIUS)
-        mPaint.setShadowLayer(2f, 2f, 5f, SHADOW_COLOR)
         setPadding(PADDING, PADDING, PADDING, PADDING)
         generateRenderBubbleLegPrototype()
         layoutParams = ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
@@ -65,37 +63,60 @@ class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, styl
         mBubbleLegPrototype.close()
     }
 
+    fun getOffsetWidthDistance() : Float {
+        //必须手动执行measure() 负责无法得到宽度
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        return mBubbleLegOffset * measuredWidth
+    }
+
+    fun getOffsetHeightDistance() : Float {
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        return mBubbleLegOffset * measuredHeight
+    }
+
+    fun setBubbleLegOffset(offset: Float) = apply {
+        this.mBubbleLegOffset = offset
+    }
+
+    fun getMeasureWidth(): Int {
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        return measuredWidth
+    }
+
+    fun setPaintColor(color: Int) = apply {
+        this.mPaint.color = color
+        mPaint.setShadowLayer(2f, 2f, 5f, color)
+    }
+
+    fun setBubbleOrientation(orientation: Int) = apply {
+        this.mBubbleOrientation = orientation
+    }
+
+
     private fun renderBubbleLegMatrix(width: Int, height: Int): Matrix {
-        val offset =
-            Math.max(mBubbleLegOffset, MIN_LEG_DISTANCE)
+        val offset = mBubbleLegOffset
         var dstX = 0f
-        var dstY =
-            Math.min(offset, height - MIN_LEG_DISTANCE)
+        var dstY = 0f
         val matrix = Matrix()
         when (mBubbleOrientation) {
-            BubbleLegOrientation.TOP -> {
-                dstX = Math.min(
-                    offset,
-                    width - MIN_LEG_DISTANCE
-                )
+            Gravity.TOP -> {
+                dstX = width * offset
+                dstY = height.toFloat()
+                matrix.postRotate(270f)
+            }
+            Gravity.RIGHT -> {
+                dstX = 0f
+                dstY = height * offset
+            }
+            Gravity.BOTTOM -> {
+                dstX = width * offset
                 dstY = 0f
                 matrix.postRotate(90f)
             }
-            BubbleLegOrientation.RIGHT -> {
+            Gravity.LEFT -> {
                 dstX = width.toFloat()
-                dstY = Math.min(
-                    offset,
-                    height - MIN_LEG_DISTANCE
-                )
+                dstY = height * offset
                 matrix.postRotate(180f)
-            }
-            BubbleLegOrientation.BOTTOM -> {
-                dstX = Math.min(
-                    offset,
-                    width - MIN_LEG_DISTANCE
-                )
-                dstY = height.toFloat()
-                matrix.postRotate(270f)
             }
             else -> {}
         }
@@ -114,9 +135,5 @@ class BubbleRelativeLayout (mContext: Context, attributeSet: AttributeSet?, styl
             mPath.addPath(mBubbleLegPrototype, renderBubbleLegMatrix(width, height))
         }
         canvas?.drawPath(mPath, mPaint)
-    }
-
-    enum class BubbleLegOrientation {
-        TOP, LEFT, RIGHT, BOTTOM, NONE
     }
 }
